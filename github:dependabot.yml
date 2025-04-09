@@ -1,0 +1,6 @@
+version: 2
+updates:
+  - package-ecosystem: "swift"
+    directory: "/"  # or subdirectory if your Package.swift is nested
+    schedule:
+      interval: "daily"  # or "weekly", "monthly"
