@@ -1,0 +1,39 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build (macOS, Apple Silicon)
+    runs-on: macos-15 # arm64 runner
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: swift --version
+
+      - name: Build release (arm64)
+        run: swift build -c release --arch arm64
+
+      - name: Check binary is arm64 only
+        run: |
+          BIN="$(swift build -c release --arch arm64 --show-bin-path)/SecureClipboard"
+          file "$BIN"
+          lipo -archs "$BIN" | grep -qx arm64
+
+      - name: Package app bundle
+        run: |
+          ./build-app.sh
+          codesign --verify --verbose "Secure Clipboard.app"

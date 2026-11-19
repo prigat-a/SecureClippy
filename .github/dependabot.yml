@@ -1,6 +1,13 @@
 version: 2
 updates:
+  # Swift packages listed in Package.swift (none yet).
   - package-ecosystem: "swift"
     directory: "/"
     schedule:
       interval: "daily"
+
+  # Actions used by the build check in .github/workflows.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
