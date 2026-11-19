@@ -5,6 +5,12 @@ A small, lightweight clipboard history app for Apple Silicon Macs. History is lo
 > [!WARNING]
 > **Disclaimer: I'm a vibecoder, not a security expert.** This app was built with the help of AI tools and has not been professionally audited. It is provided as-is, without any warranty (see [LICENSE](LICENSE)). **If you use it, you do so at your own risk and are responsible for any consequences**, including for any sensitive data you copy while it's running.
 
+## ⬇️ Download
+
+**[Download the latest version for Mac](https://github.com/prigat-a/SecureClippy/releases/latest/download/SecureClipboard.zip)** (Apple Silicon, macOS 12+). The [landing page](https://prigat-a.github.io/SecureClippy/) has install steps.
+
+Every change to the app on `main` is built and published automatically as a new [release](https://github.com/prigat-a/SecureClippy/releases), so that link always gets the newest build.
+
 ## 🙏 Help wanted
 
 A clipboard manager sees everything you copy, so it should be checked by more eyes than mine. If you know Swift, macOS or security, I'd really appreciate your help:
