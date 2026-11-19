@@ -55,8 +55,29 @@ final class StatusMenuController: NSObject, NSMenuDelegate {
         DispatchQueue.main.async { [weak self] in self?.showMenuAtMouse() }
     }
 
-    private func showMenuAtMouse() {
+    /// Set when the user highlights or picks something, so we can tell a menu
+    /// the user closed from one macOS dismissed on its own.
+    private var userInteracted = false
+
+    /// Opens the menu at the pointer. Right after a hot key or Touch ID, macOS
+    /// sometimes dismisses the menu immediately (a focus change lands just as
+    /// it opens). If it closes within a moment with no interaction, reopen it.
+    private func showMenuAtMouse(attempt: Int = 1) {
+        userInteracted = false
+        let opened = Date()
         menu.popUp(positioning: nil, at: NSEvent.mouseLocation, in: nil)
+        let openFor = Date().timeIntervalSince(opened)
+
+        let dismissedBySystem = openFor < 0.4 && !userInteracted
+        if dismissedBySystem && attempt < 3 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
+                self?.showMenuAtMouse(attempt: attempt + 1)
+            }
+        }
+    }
+
+    func menu(_ menu: NSMenu, willHighlight item: NSMenuItem?) {
+        if item != nil { userInteracted = true }
     }
 
     // MARK: - Building the menu
@@ -177,6 +198,7 @@ final class StatusMenuController: NSObject, NSMenuDelegate {
     // MARK: - Actions
 
     @objc private func select(_ sender: NSMenuItem) {
+        userInteracted = true
         guard let id = sender.representedObject as? UUID,
               let entry = clipboard.clipboardItems.first(where: { $0.id == id }) else { return }
         clipboard.copyToClipboard(entry)
