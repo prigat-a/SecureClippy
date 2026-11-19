@@ -24,8 +24,9 @@ Any feedback, big or small, is welcome. Thank you!
 
 ## Features
 
-- Press **⌘⇧V** in any app to open a popup of your history and paste from it
-- Clipboard history (text) with copy, delete and clear-all
+- Lives in the **menu bar**, with no window and no Dock icon
+- Click the icon, or press **⌘⇧V** in any app, for a dropdown of your history; pick an entry to paste it
+- Clipboard history (text) with clear-all and manual lock
 - Unlock with Touch ID, or the account password if Touch ID isn't available
 - Every entry encrypted with AES-256-GCM; text is decrypted only to show or copy it
 - Skips items that password managers mark as concealed or transient
@@ -57,19 +58,18 @@ To package it as a double-clickable `Secure Clipboard.app` in this folder:
 ./build-app.sh
 ```
 
-## Quick paste (⌘⇧V)
+## Using it
 
-Press ⌘⇧V anywhere. A popup opens next to the mouse pointer (unlock with Touch ID if it's locked).
+Secure Clipboard lives in the menu bar as a clipboard icon. Click it, or press **⌘⇧V** in any app to open the same menu next to the mouse pointer. If the history is locked, Touch ID (or your password) unlocks it first.
 
-- **↑ / ↓** to pick an entry, **↩** or a click to paste it
-- **1–9** to paste one of the first nine entries straight away
-- **esc** or clicking elsewhere closes it
+- The 10 newest entries are listed directly; older ones are grouped in submenus (11 – 20, 21 – 30, …)
+- Click an entry, or press its number (**1–9**, **0** for the tenth) while the menu is open, to paste it
+- **↑ / ↓** and **↩** work too; **esc** closes the menu
+- The menu also has **Clear History**, **Lock** and **Quit**
 
 Pasting into the other app requires **Accessibility** permission. macOS asks for it the first time. Turn on Secure Clipboard in System Settings → Privacy & Security → Accessibility. Until then, picking an entry just copies it, and you press ⌘V yourself.
 
 Because `build-app.sh` signs ad-hoc, macOS treats every rebuild as a new app. After rebuilding, remove the old Accessibility entry and turn the new one on.
-
-The app keeps running after you close its window so ⌘⇧V keeps working. Quit it with ⌘Q.
 
 ## How it works
 

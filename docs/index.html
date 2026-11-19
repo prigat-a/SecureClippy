@@ -99,18 +99,27 @@
     background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
     box-shadow: var(--shadow); overflow: hidden; max-width: 420px; justify-self: center; width: 100%;
   }
-  .mock-bar { height: 30px; display: flex; align-items: center; gap: 7px; padding: 0 12px; }
-  .mock-bar span { width: 11px; height: 11px; border-radius: 50%; background: var(--border); }
-  .mock-list { list-style: none; margin: 0; padding: 0 8px 8px; }
+  .mock-menubar {
+    display: flex; justify-content: flex-end; align-items: center; gap: 14px;
+    height: 30px; padding: 0 14px; font-size: 13px; font-weight: 500;
+    background: var(--surface-2); border-bottom: 1px solid var(--border);
+  }
+  .mb-icon {
+    display: grid; place-items: center; width: 26px; height: 22px; border-radius: 5px;
+    background: var(--accent-soft);
+  }
+  .mb-icon svg { width: 15px; height: 15px; }
+  .mock-list { list-style: none; margin: 0; padding: 6px; }
   .mock-list li {
     display: flex; gap: 12px; align-items: baseline;
-    padding: 9px 10px; border-radius: 8px; font-size: 15px;
+    padding: 6px 10px; border-radius: 6px; font-size: 14px;
   }
-  .mock-list li.sel { background: var(--accent-soft); }
-  .mock-list .n { width: 12px; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+  .mock-list li.sel { background: var(--accent); color: var(--accent-text); }
+  .mock-list li.sel .n { color: inherit; opacity: .8; }
+  .mock-list li.head { color: var(--muted); font-size: 12px; padding-top: 4px; padding-bottom: 2px; }
+  .mock-list li.sep { padding: 0; margin: 5px 10px; border-top: 1px solid var(--border); border-radius: 0; }
+  .mock-list .n { margin-left: auto; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
   .mock-list .t { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .mock-list .dim { color: var(--muted); font-style: italic; }
-  .mock-foot { border-top: 1px solid var(--border); padding: 9px 14px; font-size: 12px; color: var(--muted); }
 
   /* Sections */
   section { padding: 56px 0; border-top: 1px solid var(--border); }
@@ -198,8 +207,8 @@
     <div>
       <h1>Your clipboard history, locked&nbsp;tight.</h1>
       <p class="lede">
-        Press <kbd>⌘</kbd><kbd>⇧</kbd><kbd>V</kbd> in any app, unlock with Touch ID, and paste
-        anything you copied today. Encrypted, kept in memory only, and gone when you quit.
+        It lives in your menu bar. Press <kbd>⌘</kbd><kbd>⇧</kbd><kbd>V</kbd> in any app, unlock with
+        Touch ID, and paste anything you copied today. Encrypted, kept in memory only, and gone when you quit.
       </p>
       <div class="cta">
         <a class="btn download" href="https://github.com/prigat-a/SecureClippy/releases/latest/download/SecureClipboard.zip">
@@ -213,16 +222,26 @@
       </div>
     </div>
 
-    <div class="mock" aria-label="Illustration of the quick paste popup">
-      <div class="mock-bar"><span></span><span></span><span></span></div>
+    <div class="mock" aria-label="Illustration of the Secure Clipboard menu">
+      <div class="mock-menubar" aria-hidden="true">
+        <span class="mb-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="3" width="8" height="4" rx="1"/><path d="M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"/></svg>
+        </span>
+        <span>Wed 9:41</span>
+      </div>
       <ul class="mock-list">
-        <li class="sel"><span class="n">1</span><span class="t">Meeting moved to 3:30, same room</span></li>
-        <li><span class="n">2</span><span class="t">https://example.com/invoice/2026-11</span></li>
-        <li><span class="n">3</span><span class="t">git commit -m "fix login redirect"</span></li>
-        <li><span class="n">4</span><span class="t">Shipping address: 12 Example St.</span></li>
-        <li><span class="n">5</span><span class="t dim">Passwords from your password manager are never saved</span></li>
+        <li class="head">History</li>
+        <li class="sel"><span class="t">Meeting moved to 3:30, same room</span><span class="n">1</span></li>
+        <li><span class="t">https://example.com/invoice/2026-11</span><span class="n">2</span></li>
+        <li><span class="t">git commit -m "fix login redirect"</span><span class="n">3</span></li>
+        <li><span class="t">Shipping address: 12 Example St.</span><span class="n">4</span></li>
+        <li><span class="t">11 – 20</span><span class="n">›</span></li>
+        <li class="sep"></li>
+        <li><span class="t">Clear History</span></li>
+        <li><span class="t">Lock</span></li>
+        <li class="sep"></li>
+        <li class="head">Open this menu anywhere with ⌘⇧V</li>
       </ul>
-      <div class="mock-foot">↩ paste &nbsp; ↑↓ select &nbsp; 1–9 quick paste &nbsp; esc close</div>
     </div>
   </div>
 
@@ -233,8 +252,8 @@
       <div class="grid">
         <div class="card">
           <div class="icon">⌨️</div>
-          <h3>⌘⇧V anywhere</h3>
-          <p>A popup opens next to your pointer. Arrow keys and Return, a click, or 1–9 pastes straight into the app you're using.</p>
+          <h3>Menu bar + ⌘⇧V</h3>
+          <p>Click the menu bar icon, or press ⌘⇧V and the same menu drops down at your pointer. Click an entry or press its number to paste it into the app you're using.</p>
         </div>
         <div class="card">
           <div class="icon">👆</div>
@@ -259,7 +278,7 @@
         <div class="card">
           <div class="icon">🪶</div>
           <h3>Featherweight</h3>
-          <p>A native Apple Silicon app smaller than 300&nbsp;KB that sits at about 0% CPU while idle.</p>
+          <p>A native Apple Silicon app under 200&nbsp;KB. No window, no Dock icon, about 0% CPU while idle.</p>
         </div>
       </div>
     </div>
@@ -286,6 +305,7 @@
             <strong>System Settings → Privacy &amp; Security</strong>, scroll down and click
             <strong>Open Anyway</strong>.
           </p>
+          <p>Once it's running, look for the clipboard icon in the menu bar at the top of the screen. There's no window or Dock icon.</p>
           <details>
             <summary>On macOS 14 or earlier, or prefer Terminal?</summary>
             <p>On macOS 12–14: right-click the app, choose <strong>Open</strong>, then <strong>Open</strong> again.</p>

@@ -1,16 +1,13 @@
 import AppKit
 import LocalAuthentication
 
-final class AuthenticationManager: ObservableObject {
-    @Published private(set) var isAuthenticated = false
-    @Published private(set) var isAuthenticating = false
-    @Published var errorMessage: String?
-
+final class AuthenticationManager {
+    private(set) var isAuthenticated = false
+    private var isAuthenticating = false
     private var observers: [NSObjectProtocol] = []
 
     init() {
-        // Lock whenever the screen locks or the Mac goes to sleep, whether or
-        // not the main window is open.
+        // Lock whenever the screen locks or the Mac goes to sleep.
         observers.append(DistributedNotificationCenter.default().addObserver(
             forName: .init("com.apple.screenIsLocked"), object: nil, queue: .main
         ) { [weak self] _ in self?.logout() })
@@ -29,13 +26,15 @@ final class AuthenticationManager: ObservableObject {
     /// Uses Touch ID when available and falls back to the account password.
     /// Retry limits and lockout are enforced by the system, which (unlike an
     /// in-app counter) survive restarting the app.
-    func authenticate() {
-        guard !isAuthenticating, !isAuthenticated else { return }
+    func authenticate(completion: ((Bool) -> Void)? = nil) {
+        if isAuthenticated { completion?(true); return }
+        guard !isAuthenticating else { return }
+
         let context = LAContext()
         var error: NSError?
-
         guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) else {
-            errorMessage = error?.localizedDescription ?? "Authentication isn't available on this Mac."
+            showError(error?.localizedDescription ?? "Authentication isn't available on this Mac.")
+            completion?(false)
             return
         }
 
@@ -45,20 +44,30 @@ final class AuthenticationManager: ObservableObject {
             DispatchQueue.main.async {
                 guard let self else { return }
                 self.isAuthenticating = false
-                if success {
-                    self.isAuthenticated = true
-                    self.errorMessage = nil
-                } else if let laError = error as? LAError,
-                          [.userCancel, .appCancel, .systemCancel].contains(laError.code) {
-                    // Dismissed by the user or system; not worth an alert.
-                } else {
-                    self.errorMessage = error?.localizedDescription ?? "Authentication failed."
+                self.isAuthenticated = success
+                if !success, let error, !Self.isCancellation(error) {
+                    self.showError(error.localizedDescription)
                 }
+                completion?(success)
             }
         }
     }
 
     func logout() {
         isAuthenticated = false
+    }
+
+    private static func isCancellation(_ error: Error) -> Bool {
+        guard let laError = error as? LAError else { return false }
+        return [.userCancel, .appCancel, .systemCancel].contains(laError.code)
+    }
+
+    private func showError(_ message: String) {
+        NSApp.activate(ignoringOtherApps: true)
+        let alert = NSAlert()
+        alert.messageText = "Couldn't unlock Secure Clipboard"
+        alert.informativeText = message
+        alert.alertStyle = .warning
+        alert.runModal()
     }
 }
