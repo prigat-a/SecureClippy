@@ -7,8 +7,8 @@ import AppKit
 /// Plaintext is never stored: each entry holds only its AES-GCM ciphertext and a
 /// SHA-256 digest (used to skip duplicates). Text is decrypted on demand, only
 /// when the unlocked UI shows it or copies it back to the pasteboard.
-final class ClipboardManager: ObservableObject {
-    @Published private(set) var clipboardItems: [ClipboardItem] = []
+final class ClipboardManager {
+    private(set) var clipboardItems: [ClipboardItem] = []
 
     /// Entries older than this are dropped.
     let maxItemAge: TimeInterval = 24 * 60 * 60
