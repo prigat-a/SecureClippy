@@ -2,6 +2,20 @@
 
 A small, lightweight clipboard history app for Apple Silicon Macs. History is locked behind Touch ID and is only ever kept encrypted in memory.
 
+> [!WARNING]
+> **Disclaimer: I'm a vibecoder, not a security expert.** This app was built with the help of AI tools and has not been professionally audited. It is provided as-is, without any warranty (see [LICENSE](LICENSE)). **If you use it, you do so at your own risk and are responsible for any consequences**, including for any sensitive data you copy while it's running.
+
+## 🙏 Help wanted
+
+A clipboard manager sees everything you copy, so it should be checked by more eyes than mine. If you know Swift, macOS or security, I'd really appreciate your help:
+
+- **Review the code**, especially the encryption in [ClipboardManager.swift](SecureClipboard/ClipboardManager.swift) and the unlock flow in [AuthenticationManager.swift](SecureClipboard/AuthenticationManager.swift)
+- **Test it** on your Mac and macOS version, and with your password manager
+- **Report problems** by [opening an issue](../../issues). Please report security issues privately via [GitHub security advisories](../../security/advisories/new) rather than in a public issue
+- **Send fixes** as pull requests
+
+Any feedback, big or small, is welcome. Thank you!
+
 ## Features
 
 - Press **⌘⇧V** in any app to open a popup of your history and paste from it
