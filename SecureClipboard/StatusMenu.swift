@@ -35,20 +35,34 @@ final class StatusMenuController: NSObject, NSMenuDelegate {
         statusItem.menu = menu
     }
 
+    /// After the Touch ID dialog closes, macOS hands focus back to the previous
+    /// app, and that would instantly close a menu opened at the same moment.
+    private let delayAfterUnlock: TimeInterval = 0.35
+
     /// ⌘⇧V: unlock first if needed, then show the menu at the pointer.
     func popUpAtMouse() {
+        auth.lockIfIdle()
         guard auth.isAuthenticated else {
             auth.authenticate { [weak self] unlocked in
-                if unlocked { self?.popUpAtMouse() }
+                guard unlocked, let self else { return }
+                DispatchQueue.main.asyncAfter(deadline: .now() + self.delayAfterUnlock) {
+                    self.showMenuAtMouse()
+                }
             }
             return
         }
+        // Return from the hot-key event handler before the menu starts tracking.
+        DispatchQueue.main.async { [weak self] in self?.showMenuAtMouse() }
+    }
+
+    private func showMenuAtMouse() {
         menu.popUp(positioning: nil, at: NSEvent.mouseLocation, in: nil)
     }
 
     // MARK: - Building the menu
 
     func menuNeedsUpdate(_ menu: NSMenu) {
+        auth.lockIfIdle()
         menu.removeAllItems()
 
         if auth.isAuthenticated {
@@ -56,7 +70,8 @@ final class StatusMenuController: NSObject, NSMenuDelegate {
             menu.addItem(.separator())
             menu.addItem(item("Clear History", action: #selector(clearHistory),
                               enabled: !clipboard.clipboardItems.isEmpty))
-            menu.addItem(item("Lock", action: #selector(lock)))
+            menu.addItem(item("Lock Now", action: #selector(lock)))
+            menu.addItem(lockAfterMenu())
         } else {
             let count = clipboard.clipboardItems.count
             menu.addItem(item("Unlock History…", action: #selector(unlock)))
@@ -96,6 +111,31 @@ final class StatusMenuController: NSObject, NSMenuDelegate {
             parent.submenu = submenu
             menu.addItem(parent)
             start = end
+        }
+    }
+
+    /// "Lock After ▸" submenu with the current choice checked.
+    private func lockAfterMenu() -> NSMenuItem {
+        let submenu = NSMenu()
+        submenu.autoenablesItems = false
+        let current = auth.lockTimeout
+        for (index, option) in AuthenticationManager.lockOptions.enumerated() {
+            let choice = item(option.title, action: #selector(setLockTimeout(_:)))
+            choice.tag = index
+            choice.state = option.seconds == current ? .on : .off
+            submenu.addItem(choice)
+        }
+        let parent = NSMenuItem(title: "Require Touch ID After", action: nil, keyEquivalent: "")
+        parent.submenu = submenu
+        return parent
+    }
+
+    func menuDidClose(_ menu: NSMenu) {
+        guard auth.isAuthenticated else { return }
+        if auth.lockTimeout == 0 {
+            auth.logout() // "Immediately": every opening needs Touch ID
+        } else {
+            auth.noteActivity()
         }
     }
 
@@ -152,9 +192,18 @@ final class StatusMenuController: NSObject, NSMenuDelegate {
 
     @objc private func unlock() {
         auth.authenticate { [weak self] unlocked in
+            guard unlocked, let self else { return }
             // Reopen the menu so the history is right there.
-            if unlocked { self?.statusItem.button?.performClick(nil) }
+            DispatchQueue.main.asyncAfter(deadline: .now() + self.delayAfterUnlock) {
+                self.statusItem.button?.performClick(nil)
+            }
         }
+    }
+
+    @objc private func setLockTimeout(_ sender: NSMenuItem) {
+        let options = AuthenticationManager.lockOptions
+        guard options.indices.contains(sender.tag) else { return }
+        auth.lockTimeout = options[sender.tag].seconds
     }
 
     @objc private func lock() {

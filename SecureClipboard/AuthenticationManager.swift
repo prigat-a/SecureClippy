@@ -2,9 +2,48 @@ import AppKit
 import LocalAuthentication
 
 final class AuthenticationManager {
+    /// Choices for the "Lock After" menu. `nil` means only when the Mac locks or sleeps.
+    static let lockOptions: [(title: String, seconds: TimeInterval?)] = [
+        ("Immediately", 0),
+        ("1 Minute", 60),
+        ("5 Minutes", 5 * 60),
+        ("15 Minutes", 15 * 60),
+        ("1 Hour", 60 * 60),
+        ("Only When the Mac Locks or Sleeps", nil),
+    ]
+    private static let lockTimeoutKey = "lockTimeout"
+    private static let defaultLockTimeout: TimeInterval = 5 * 60
+
     private(set) var isAuthenticated = false
     private var isAuthenticating = false
+    private var lastUsed = Date()
     private var observers: [NSObjectProtocol] = []
+
+    /// Idle time before Touch ID is needed again: 0 = every time, nil = never
+    /// (still locks with the screen and on sleep). Saved between launches.
+    var lockTimeout: TimeInterval? {
+        get {
+            guard let stored = UserDefaults.standard.object(forKey: Self.lockTimeoutKey) as? Double else {
+                return Self.defaultLockTimeout
+            }
+            return stored < 0 ? nil : stored
+        }
+        set {
+            UserDefaults.standard.set(newValue ?? -1, forKey: Self.lockTimeoutKey)
+        }
+    }
+
+    /// Call whenever the history is used, to restart the idle countdown.
+    func noteActivity() {
+        lastUsed = Date()
+    }
+
+    /// Locks if the history has been idle for longer than `lockTimeout`.
+    /// Checked whenever the menu is about to open, so no timer has to run.
+    func lockIfIdle() {
+        guard isAuthenticated, let timeout = lockTimeout, timeout > 0 else { return }
+        if Date().timeIntervalSince(lastUsed) >= timeout { logout() }
+    }
 
     init() {
         // Lock whenever the screen locks or the Mac goes to sleep.
@@ -45,6 +84,7 @@ final class AuthenticationManager {
                 guard let self else { return }
                 self.isAuthenticating = false
                 self.isAuthenticated = success
+                if success { self.lastUsed = Date() }
                 if !success, let error, !Self.isCancellation(error) {
                     self.showError(error.localizedDescription)
                 }

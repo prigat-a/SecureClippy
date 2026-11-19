@@ -30,7 +30,7 @@ Any feedback, big or small, is welcome. Thank you!
 - Unlock with Touch ID, or the account password if Touch ID isn't available
 - Every entry encrypted with AES-256-GCM; text is decrypted only to show or copy it
 - Skips items that password managers mark as concealed or transient
-- Locks itself when the screen locks or the Mac sleeps
+- Locks itself after a period of inactivity you choose (default 5 minutes), and whenever the screen locks or the Mac sleeps
 - Entries expire after 24 hours; history is capped at 200 items
 - Native arm64 build, ~300 KB binary, ~0% CPU when idle
 
@@ -65,7 +65,8 @@ Secure Clipboard lives in the menu bar as a clipboard icon. Click it, or press *
 - The 10 newest entries are listed directly; older ones are grouped in submenus (11 – 20, 21 – 30, …)
 - Click an entry, or press its number (**1–9**, **0** for the tenth) while the menu is open, to paste it
 - **↑ / ↓** and **↩** work too; **esc** closes the menu
-- The menu also has **Clear History**, **Lock** and **Quit**
+- The menu also has **Clear History**, **Lock Now** and **Quit**
+- **Require Touch ID After** sets how long the history stays unlocked while you're not using it: immediately (every time), 1, 5 or 15 minutes, 1 hour, or only when the Mac locks or sleeps. The default is 5 minutes, and your choice is remembered
 
 Pasting into the other app requires **Accessibility** permission. macOS asks for it the first time. Turn on Secure Clipboard in System Settings → Privacy & Security → Accessibility. Until then, picking an entry just copies it, and you press ⌘V yourself.
 
